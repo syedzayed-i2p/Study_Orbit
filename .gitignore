@@ -24,3 +24,4 @@ replit.nix
 attached_assets.codex/
 .codex/
 .codex-artifacts/
+.playwright-mcp/

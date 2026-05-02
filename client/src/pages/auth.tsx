@@ -388,7 +388,7 @@ export function LoginPage() {
                     <button
                       type="button"
                       onClick={() => navigate("/forgot-password")}
-                      className="text-xs text-primary/80 hover:text-primary font-medium transition-colors"
+                      className="-mr-2 min-h-9 rounded-xl px-2 text-xs font-medium text-primary/80 transition-colors hover:bg-primary/5 hover:text-primary"
                       data-testid="link-forgot-password"
                     >
                       {t.auth.forgotPassword}
@@ -408,7 +408,7 @@ export function LoginPage() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-foreground transition-colors"
+                      className="absolute right-2.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-xl text-muted-foreground/50 transition-colors hover:bg-muted/70 hover:text-foreground"
                       data-testid="button-toggle-password"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -446,7 +446,7 @@ export function LoginPage() {
             <motion.div key="otp-send" {...fadeSlide} transition={{ duration: 0.25 }}>
               <button
                 onClick={() => { setMode("password"); setFormError(""); setErrors({}); }}
-                className="group mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground/75 transition-colors hover:text-foreground"
+                className="group -ml-2 mb-6 inline-flex min-h-10 items-center gap-1.5 rounded-xl px-2 text-sm text-muted-foreground/75 transition-colors hover:bg-muted/60 hover:text-foreground"
                 data-testid="button-back-login"
               >
                 <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" /> {t.auth.loginWithPassword}
@@ -485,7 +485,7 @@ export function LoginPage() {
             <motion.div key="otp-verify" {...fadeSlide} transition={{ duration: 0.25 }}>
               <button
                 onClick={() => { setMode("otp-send"); setFormError(""); }}
-                className="group mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground/75 transition-colors hover:text-foreground"
+                className="group -ml-2 mb-6 inline-flex min-h-10 items-center gap-1.5 rounded-xl px-2 text-sm text-muted-foreground/75 transition-colors hover:bg-muted/60 hover:text-foreground"
                 data-testid="button-back-otp-send"
               >
                 <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" /> {t.common.back}
@@ -513,7 +513,7 @@ export function LoginPage() {
           {t.auth.noAccount}{" "}
           <button
             onClick={() => navigate("/register")}
-            className="text-primary font-semibold hover:underline underline-offset-4 transition-colors"
+            className="-my-2 inline-flex min-h-10 items-center rounded-xl px-2 font-semibold text-primary transition-colors hover:bg-primary/5 hover:underline hover:underline-offset-4"
             data-testid="link-register"
           >
             {t.auth.signUp}
@@ -657,7 +657,7 @@ export function RegisterPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-foreground transition-colors"
+                className="absolute right-2.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-xl text-muted-foreground/50 transition-colors hover:bg-muted/70 hover:text-foreground"
                 data-testid="button-toggle-password-register"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -675,7 +675,7 @@ export function RegisterPage() {
           {t.auth.hasAccount}{" "}
           <button
             onClick={() => navigate("/login")}
-            className="text-primary font-semibold hover:underline underline-offset-4 transition-colors"
+            className="-my-2 inline-flex min-h-10 items-center rounded-xl px-2 font-semibold text-primary transition-colors hover:bg-primary/5 hover:underline hover:underline-offset-4"
             data-testid="link-login"
           >
             {t.auth.signIn}
@@ -764,7 +764,7 @@ export function ForgotPasswordPage() {
       <AuthFormContainer>
         <button
           onClick={() => navigate("/login")}
-          className="group mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground/75 transition-colors hover:text-foreground"
+          className="group -ml-2 mb-6 inline-flex min-h-10 items-center gap-1.5 rounded-xl px-2 text-sm text-muted-foreground/75 transition-colors hover:bg-muted/60 hover:text-foreground"
           data-testid="button-back-to-login"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" /> {t.auth.signIn}
@@ -863,7 +863,7 @@ export function ForgotPasswordPage() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-foreground transition-colors"
+                      className="absolute right-2.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-xl text-muted-foreground/50 transition-colors hover:bg-muted/70 hover:text-foreground"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>

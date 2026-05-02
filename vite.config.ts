@@ -15,6 +15,17 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ["react", "react-dom", "wouter"],
+          query: ["@tanstack/react-query"],
+          charts: ["recharts"],
+          markdown: ["react-markdown", "remark-gfm"],
+          motion: ["framer-motion"],
+        },
+      },
+    },
   },
   server: {
     fs: {
