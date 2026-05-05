@@ -30,7 +30,7 @@ export async function registerRoutes(
     store: new MemoryStore({ checkPeriod: 86400000 }),
     cookie: {
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      secure: isProduction ? "auto" : false,
+      secure: isProduction,
       httpOnly: true,
       sameSite: "lax",
     },
@@ -39,12 +39,19 @@ export async function registerRoutes(
   app.use(sessionMiddleware);
 
   async function attachAuthenticatedSession(req: Request, userId: number): Promise<void> {
-    await new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       req.session.regenerate((regenError) => {
-        if (regenError) return reject(regenError);
+        if (regenError) {
+          console.error("[AUTH] Session regeneration error:", regenError);
+          return reject(regenError);
+        }
         req.session.userId = userId;
         req.session.save((saveError) => {
-          if (saveError) return reject(saveError);
+          if (saveError) {
+            console.error("[AUTH] Session save error:", saveError);
+            return reject(saveError);
+          }
+          console.log(`[AUTH] Session established for user ID: ${userId}`);
           resolve();
         });
       });
@@ -54,19 +61,22 @@ export async function registerRoutes(
   app.post("/api/auth/register", async (req: Request, res: Response) => {
     try {
       const data = registerSchema.parse(req.body);
-      const existingEmail = await storage.getUserByEmail(data.email);
+      const email = data.email.toLowerCase();
+      const existingEmail = await storage.getUserByEmail(email);
       if (existingEmail) return res.status(400).json({ message: "Email already registered" });
       const existingUsername = await storage.getUserByUsername(data.username);
       if (existingUsername) return res.status(400).json({ message: "Username already taken" });
       const hashedPassword = await hashPassword(data.password);
       const user = await storage.createUser({
         ...data,
+        email,
         password: hashedPassword,
       });
       await attachAuthenticatedSession(req, user.id);
       const { password, ...safeUser } = user;
       res.json(safeUser);
     } catch (error: any) {
+      console.error("[AUTH] Registration error:", error);
       res.status(400).json({ message: error.message || "Registration failed" });
     }
   });
@@ -74,14 +84,21 @@ export async function registerRoutes(
   app.post("/api/auth/login", async (req: Request, res: Response) => {
     try {
       const data = loginSchema.parse(req.body);
-      const user = await storage.getUserByEmail(data.email);
-      if (!user) return res.status(401).json({ message: "Invalid credentials" });
+      const user = await storage.getUserByEmail(data.email.toLowerCase());
+      if (!user) {
+        console.warn(`[AUTH] Login failed: User not found (${data.email})`);
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
       const valid = await comparePassword(data.password, user.password);
-      if (!valid) return res.status(401).json({ message: "Invalid credentials" });
+      if (!valid) {
+        console.warn(`[AUTH] Login failed: Invalid password for ${data.email}`);
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
       await attachAuthenticatedSession(req, user.id);
       const { password, ...safeUser } = user;
       res.json(safeUser);
     } catch (error: any) {
+      console.error("[AUTH] Login error:", error);
       res.status(400).json({ message: error.message || "Login failed" });
     }
   });
@@ -117,16 +134,18 @@ export async function registerRoutes(
       const { email, code } = req.body;
       if (!email || !code) return res.status(400).json({ message: "Email and code required" });
 
-      const valid = await storage.verifyCode(email, code, "login");
+      const normalizedEmail = email.toLowerCase();
+      const valid = await storage.verifyCode(normalizedEmail, code, "login");
       if (!valid) return res.status(401).json({ message: "Invalid or expired code" });
 
-      const user = await storage.getUserByEmail(email);
+      const user = await storage.getUserByEmail(normalizedEmail);
       if (!user) return res.status(404).json({ message: "User not found" });
 
       await attachAuthenticatedSession(req, user.id);
       const { password, ...safeUser } = user;
       res.json(safeUser);
     } catch (error: any) {
+      console.error("[AUTH] Verify login error:", error);
       res.status(500).json({ message: error.message });
     }
   });
@@ -153,16 +172,18 @@ export async function registerRoutes(
       if (!email || !code || !newPassword) return res.status(400).json({ message: "All fields required" });
       if (newPassword.length < 6) return res.status(400).json({ message: "Password must be at least 6 characters" });
 
-      const valid = await storage.verifyCode(email, code, "reset_verified");
+      const normalizedEmail = email.toLowerCase();
+      const valid = await storage.verifyCode(normalizedEmail, code, "reset_verified");
       if (!valid) return res.status(401).json({ message: "Invalid or expired reset token" });
 
-      const user = await storage.getUserByEmail(email);
+      const user = await storage.getUserByEmail(normalizedEmail);
       if (!user) return res.status(404).json({ message: "User not found" });
 
       const hashedPassword = await hashPassword(newPassword);
       await storage.updateUserPassword(user.id, hashedPassword);
       res.json({ message: "Password reset successfully" });
     } catch (error: any) {
+      console.error("[AUTH] Reset password error:", error);
       res.status(500).json({ message: error.message });
     }
   });

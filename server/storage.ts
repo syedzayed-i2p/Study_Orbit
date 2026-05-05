@@ -82,7 +82,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, email));
+    const [user] = await db.select().from(users).where(eq(users.email, email.toLowerCase()));
     return user;
   }
 
@@ -92,7 +92,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db.insert(users).values(insertUser).returning();
+    const [user] = await db.insert(users).values({
+      ...insertUser,
+      email: insertUser.email.toLowerCase(),
+    }).returning();
     return user;
   }
 
@@ -382,17 +385,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createVerificationCode(email: string, code: string, type: string): Promise<void> {
+    const normalizedEmail = email.toLowerCase();
     await db.update(verificationCodes)
       .set({ used: true })
-      .where(and(eq(verificationCodes.email, email), eq(verificationCodes.type, type), eq(verificationCodes.used, false)));
+      .where(and(eq(verificationCodes.email, normalizedEmail), eq(verificationCodes.type, type), eq(verificationCodes.used, false)));
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-    await db.insert(verificationCodes).values({ email, code, type, expiresAt });
+    await db.insert(verificationCodes).values({ email: normalizedEmail, code, type, expiresAt });
   }
 
   async verifyCode(email: string, code: string, type: string): Promise<boolean> {
+    const normalizedEmail = email.toLowerCase();
     const [record] = await db.select().from(verificationCodes).where(
       and(
-        eq(verificationCodes.email, email),
+        eq(verificationCodes.email, normalizedEmail),
         eq(verificationCodes.code, code),
         eq(verificationCodes.type, type),
         eq(verificationCodes.used, false)
