@@ -22,7 +22,7 @@ const fadeSlide = {
 const inputClass = "h-12 rounded-2xl border-border/60 bg-background/70 pl-10 text-sm shadow-sm transition-all duration-200 placeholder:text-muted-foreground/50 hover:border-border focus:border-primary/45 focus:bg-background focus:ring-4 focus:ring-primary/10";
 const inputClassWithRight = inputClass + " pr-11";
 const labelClass = "text-[12px] font-semibold uppercase tracking-[0.2em] text-muted-foreground";
-const iconClass = "absolute left-3.5 top-1/2 h-[15px] w-[15px] -translate-y-1/2 text-muted-foreground/60";
+const iconClass = "absolute left-3.5 top-1/2 h-[15px] w-[15px] -translate-y-1/2 text-muted-foreground/60 pointer-events-none";
 
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
@@ -222,8 +222,8 @@ function AuthFormContainer({ children }: { children: React.ReactNode }) {
   const { t } = useLanguage();
   return (
     <div className="relative flex min-h-screen flex-1 items-center justify-center overflow-hidden px-4 py-8 sm:px-6 lg:px-10">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.12),transparent_18rem)]" />
-      <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-background via-background/90 to-transparent" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.12),transparent_18rem)] pointer-events-none" />
+      <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-background via-background/90 to-transparent pointer-events-none" />
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
@@ -612,7 +612,7 @@ export function RegisterPage() {
             <div className="space-y-1.5">
               <Label className={labelClass}>{t.auth.username}</Label>
               <div className="relative">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/50 text-sm font-medium">@</span>
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/50 text-sm font-medium pointer-events-none">@</span>
                 <Input
                   value={form.username}
                   onChange={(e) => updateField("username", e.target.value)}
