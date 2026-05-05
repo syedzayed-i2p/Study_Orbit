@@ -13,6 +13,8 @@ interface AuthContextType {
   logout: () => Promise<void>;
   updateProfile: (data: Partial<SafeUser>) => Promise<SafeUser>;
   completeOnboarding: (data: any) => Promise<SafeUser>;
+  sendLoginCode: (email: string) => Promise<{ message: string; _devCode?: string }>;
+  verifyLoginOTP: (email: string, code: string) => Promise<SafeUser>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -78,6 +80,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     },
   });
 
+  const sendLoginCodeMutation = useMutation({
+    mutationFn: async (email: string) => {
+      const res = await apiRequest("POST", "/api/auth/send-code", { email, type: "login" });
+      return res.json();
+    },
+  });
+
+  const verifyLoginOTPMutation = useMutation({
+    mutationFn: async ({ email, code }: { email: string; code: string }) => {
+      const res = await apiRequest("POST", "/api/auth/verify-login", { email, code });
+      return res.json();
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(["/api/auth/me"], data);
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+    },
+  });
+
   const login = useCallback(async (email: string, password: string) => {
     return loginMutation.mutateAsync({ email, password });
   }, [loginMutation]);
@@ -98,6 +118,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return onboardingMutation.mutateAsync(data);
   }, [onboardingMutation]);
 
+  const sendLoginCode = useCallback(async (email: string) => {
+    return sendLoginCodeMutation.mutateAsync(email);
+  }, [sendLoginCodeMutation]);
+
+  const verifyLoginOTP = useCallback(async (email: string, code: string) => {
+    return verifyLoginOTPMutation.mutateAsync({ email, code });
+  }, [verifyLoginOTPMutation]);
+
   return (
     <AuthContext.Provider
       value={{
@@ -108,6 +136,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         logout,
         updateProfile,
         completeOnboarding,
+        sendLoginCode,
+        verifyLoginOTP,
       }}
     >
       {children}

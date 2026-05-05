@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { hashPassword, comparePassword, requireAuth, getCurrentUser } from "./auth";
 import { streamAIResponse, type ChatMessage, getAvailableProviders, type AIProvider } from "./ai-providers";
-import { registerSchema, loginSchema, onboardingSchema, insertSubjectSchema, insertTopicSchema, insertPlannerItemSchema, insertFocusSessionSchema, insertFeedbackSchema } from "@shared/schema";
+import { registerSchema, loginSchema, onboardingSchema, updateUserSchema, insertSubjectSchema, insertTopicSchema, insertPlannerItemSchema, insertFocusSessionSchema, insertFeedbackSchema } from "@shared/schema";
 import session from "express-session";
 import memorystore from "memorystore";
 import multer from "multer";
@@ -102,6 +102,10 @@ export async function registerRoutes(
       const code = generateCode();
       await storage.createVerificationCode(email, code, type);
 
+      // In a real application, you would send this code via email.
+      // For now, we log it to the console so it can be retrieved from server logs.
+      console.log(`[AUTH] Verification code for ${email} (${type}): ${code}`);
+
       res.json({ message: "Verification code sent", codeSentTo: email, _devCode: process.env.NODE_ENV === "development" ? code : undefined });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
@@ -192,7 +196,8 @@ export async function registerRoutes(
 
   app.patch("/api/user/profile", requireAuth, async (req: Request, res: Response) => {
     try {
-      const user = await storage.updateUser(req.session.userId!, req.body);
+      const data = updateUserSchema.parse(req.body);
+      const user = await storage.updateUser(req.session.userId!, data);
       if (!user) return res.status(404).json({ message: "User not found" });
       const { password, ...safeUser } = user;
       res.json(safeUser);

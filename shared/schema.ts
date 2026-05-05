@@ -128,6 +128,24 @@ export const onboardingSchema = z.object({
   dailyStudyHours: z.number().optional(),
 });
 
+export const updateUserSchema = z.object({
+  fullName: z.string().min(2).optional(),
+  username: z.string().min(3).optional(),
+  institution: z.string().optional(),
+  country: z.string().optional(),
+  appLanguage: z.string().optional(),
+  chatLanguage: z.string().optional(),
+  classLevel: z.string().optional(),
+  department: z.string().optional(),
+  board: z.string().optional(),
+  studyGoals: z.array(z.string()).optional(),
+  weakSubjects: z.array(z.string()).optional(),
+  strongSubjects: z.array(z.string()).optional(),
+  dailyStudyHours: z.number().optional(),
+  publicStatus: z.string().optional(),
+  privateNote: z.string().optional(),
+});
+
 export const insertSubjectSchema = createInsertSchema(subjects).omit({
   id: true,
   createdAt: true,

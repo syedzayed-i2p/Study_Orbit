@@ -261,7 +261,7 @@ function PremiumButton({ children, loading, ...props }: { children: React.ReactN
 
 export function LoginPage() {
   const { t } = useLanguage();
-  const { login } = useAuth();
+  const { login, sendLoginCode, verifyLoginOTP } = useAuth();
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const [email, setEmail] = useState("");
@@ -308,8 +308,7 @@ export function LoginPage() {
     setSendingCode(true);
     setFormError("");
     try {
-      const res = await apiRequest("POST", "/api/auth/send-code", { email: otpEmail, type: "login" });
-      const data = await res.json();
+      const data = await sendLoginCode(otpEmail);
       toast({ title: t.auth.codeSent, description: t.auth.codeExpiry });
       if (data._devCode) toast({ title: "Dev Mode", description: `Code: ${data._devCode}` });
       setMode("otp-verify");
@@ -325,10 +324,8 @@ export function LoginPage() {
     setLoading(true);
     setFormError("");
     try {
-      const res = await apiRequest("POST", "/api/auth/verify-login", { email: otpEmail, code: otpCode });
-      await res.json();
-      await new Promise(r => setTimeout(r, 100));
-      window.location.href = "/dashboard";
+      await verifyLoginOTP(otpEmail, otpCode);
+      navigate("/dashboard");
     } catch (error: any) {
       setFormError(mapServerError(error.message, t));
     } finally {
